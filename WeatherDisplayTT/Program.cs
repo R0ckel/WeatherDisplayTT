@@ -1,15 +1,30 @@
+using WeatherDisplayTT.Services.Clients.Http;
+
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpClient("AccuWeatherHttpClient", client =>
+{
+    client.BaseAddress = new Uri("https://dataservice.accuweather.com/");
+    client.Timeout = TimeSpan.FromSeconds(20);
+});
+builder.Services.AddScoped(provider =>
+{
+    var httpClientFactory = provider.GetRequiredService<IHttpClientFactory>();
+    return new Dictionary<string, IApiClient>
+    {
+        {
+            "AccuWeatherApiClient", new ApiClient(httpClientFactory.CreateClient("AccuWeatherHttpClient"))
+        }
+    };
+});
+// Note: we can also move names like this to separate static class to avoid using magis strings...
 
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 if (!app.Environment.IsDevelopment())
 {
     app.UseExceptionHandler("/Home/Error");
-    // The default HSTS value is 30 days. You may want to change this for production scenarios, see https://aka.ms/aspnetcore-hsts.
     app.UseHsts();
 }
 
