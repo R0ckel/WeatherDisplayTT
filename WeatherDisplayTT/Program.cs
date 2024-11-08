@@ -1,4 +1,5 @@
 using WeatherDisplayTT.Services.Clients.Http;
+using WeatherDisplayTT.Services.WeatherService;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -19,6 +20,7 @@ builder.Services.AddScoped(provider =>
     };
 });
 // Note: we can also move names like this to separate static class to avoid using magis strings...
+builder.Services.AddScoped<IWeatherService, WeatherService>();
 
 var app = builder.Build();
 
