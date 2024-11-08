@@ -13,7 +13,7 @@ public class WeatherService : IWeatherService
     public WeatherService(Dictionary<string, IApiClient> namedClients, IConfiguration configuration)
     {
         _apiClient = namedClients["AccuWeatherApiClient"];
-        _apiKey = configuration["AccuWeatherApiKey"] ?? "";
+        _apiKey = configuration["AccuWeather:ApiKey"] ?? "";
     }
 
     public async Task<ValueResult<CitySearchValue>> FetchCitiesByName(string locationKey)

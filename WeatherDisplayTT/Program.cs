@@ -7,7 +7,7 @@ builder.Services.AddControllersWithViews();
 builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("AccuWeatherHttpClient", client =>
 {
-    client.BaseAddress = new Uri("https://dataservice.accuweather.com/");
+    client.BaseAddress = new Uri(builder.Configuration["AccuWeather:BaseUrl"] ?? "https://dataservice.accuweather.com/");
     client.Timeout = TimeSpan.FromSeconds(20);
 });
 builder.Services.AddScoped(provider =>
