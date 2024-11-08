@@ -16,7 +16,7 @@ public class WeatherService : IWeatherService
         _apiKey = configuration["AccuWeather:ApiKey"] ?? "";
     }
 
-    public async Task<ValueResult<CitySearchValue>> FetchCitiesByName(string locationKey)
+    public async Task<ValueResult<CitySearchValue>> FetchCitiesByName(string cityQuery)
     {
         try
         {
@@ -25,7 +25,7 @@ public class WeatherService : IWeatherService
                 new GetCitiesByQueryRequest()
                 {
                     apikey = _apiKey,
-                    q = locationKey
+                    q = cityQuery
                 });
             if (response == null)
             {
@@ -34,6 +34,15 @@ public class WeatherService : IWeatherService
                     Success = false,
                     StatusCode = StatusCodes.Status500InternalServerError,
                     Errors = [$"Fetching cities resulted in empty weather server response"]
+                };
+            }
+            if (response.Count == 0)
+            {
+                return new ValueResult<CitySearchValue>()
+                {
+                    Success = false,
+                    StatusCode = StatusCodes.Status404NotFound,
+                    Errors = [$"No cities by this name found"]
                 };
             }
             return new ValueResult<CitySearchValue>()
@@ -97,7 +106,7 @@ public class WeatherService : IWeatherService
                 {
                     apikey = _apiKey
                 });
-            if (response == null || response.DailyForecasts.Count == 0)
+            if (response == null || response.DailyForecasts == null)
             {
                 return new ValueResult<WeatherForecast>()
                 {

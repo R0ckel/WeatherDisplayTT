@@ -1,19 +1,18 @@
 ﻿using Newtonsoft.Json;
+using Newtonsoft.Json.Converters;
 using Newtonsoft.Json.Linq;
 using Polly;
 using Polly.Retry;
 using System.Text;
-using System.Text.Json;
-using System.Text.Json.Serialization;
 
 namespace WeatherDisplayTT.Services.Clients.Http;
 
 public class ApiClient : IApiClient
 {
-    protected readonly JsonSerializerOptions _jsonOptions = new()
+    protected readonly JsonSerializerSettings _jsonSettings = new()
     {
-        DefaultIgnoreCondition = JsonIgnoreCondition.WhenWritingNull,
-        Converters = { new JsonStringEnumConverter() }
+        NullValueHandling = NullValueHandling.Ignore,
+        Converters = { new StringEnumConverter() }
     };
 
     protected readonly AsyncRetryPolicy _retryPolicy = Policy
@@ -76,7 +75,7 @@ public class ApiClient : IApiClient
             else
             {
                 var stringContent = new StringContent(
-                    System.Text.Json.JsonSerializer.Serialize(param, _jsonOptions),
+                    JsonConvert.SerializeObject(param, _jsonSettings),
                     Encoding.UTF8,
                     "application/json");
                 request = new HttpRequestMessage(method, url) { Content = stringContent };
@@ -84,12 +83,16 @@ public class ApiClient : IApiClient
 
             HttpResponseMessage response = await _client.SendAsync(request);
 
-            return JsonConvert.DeserializeObject<T>(
-                await response.Content.ReadAsStringAsync(),
-                new JsonSerializerSettings()
-                {
-                    NullValueHandling = NullValueHandling.Ignore
-                });
+            try
+            {
+                var content = await response.Content.ReadAsStringAsync();
+                return JsonConvert.DeserializeObject<T>(content, _jsonSettings);
+            }
+            catch (JsonException ex)
+            {
+                Console.WriteLine($"Json parsing error: {ex.Message}");
+                return default;
+            }
         });
     }
 
@@ -97,7 +100,7 @@ public class ApiClient : IApiClient
     {
         if (obj == null) return string.Empty;
 
-        var json = System.Text.Json.JsonSerializer.Serialize(obj, _jsonOptions);
+        var json = JsonConvert.SerializeObject(obj, _jsonSettings);
         var jObj = JObject.Parse(json);
         var query = new List<string>();
         foreach (var property in jObj.Properties())

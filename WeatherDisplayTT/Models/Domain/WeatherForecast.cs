@@ -6,7 +6,7 @@ using System.Collections.Generic;
 public class WeatherForecast
 {
     public HeadlineInfo Headline { get; set; } = new();
-    public List<DailyForecast> DailyForecasts { get; set; } = [];
+    public List<DailyForecast>? DailyForecasts { get; set; }
 
     public class HeadlineInfo
     {
