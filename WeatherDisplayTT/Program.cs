@@ -4,6 +4,7 @@ using WeatherDisplayTT.Services.WeatherService;
 var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllersWithViews();
+builder.Services.AddHttpContextAccessor();
 builder.Services.AddHttpClient("AccuWeatherHttpClient", client =>
 {
     client.BaseAddress = new Uri("https://dataservice.accuweather.com/");

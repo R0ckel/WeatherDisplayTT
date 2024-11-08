@@ -1,0 +1,77 @@
+﻿@using WeatherDisplayTT.ViewModels.Weather
+@model WeatherViewModel
+@{
+    ViewData["Title"] = "Weather Search";
+    var cities = Model.Cities;
+    var weather = Model.Weather;
+    var errors = Model.Errors;
+    var alertMessage = Model.AlertMessage;
+    var lastCity = Model.LastCity;
+}
+
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <h2 class="text-center text-primary">Weather Search</h2>
+
+            @if (errors != null && errors.Count > 0)
+            {
+                <div class="alert alert-danger mt-3">
+                    <ul>
+                        @foreach (var error in errors)
+                        {
+                            <li>@error</li>
+                        }
+                    </ul>
+                </div>
+            }
+
+            @if (!string.IsNullOrEmpty(alertMessage))
+            {
+                <div class="alert alert-warning mt-3">
+                    <strong>Alert:</strong> @alertMessage
+                </div>
+            }
+
+            <form asp-action="SearchCity" method="post" class="mt-4">
+                <div class="form-group">
+                    <label for="cityName" class="form-label">City Name</label>
+                    <input type="text" class="form-control" id="cityName" name="cityName" value="@lastCity?.LocalizedName" required />
+                </div>
+                <button type="submit" class="btn btn-primary w-100 mt-3">Find Cities</button>
+            </form>
+
+            @if (cities != null && cities.Count > 0)
+            {
+                <form asp-action="ShowWeather" method="post" class="mt-4">
+                    <div class="form-group">
+                        <label for="locationKey" class="form-label">Select City</label>
+                        <select class="form-control" id="locationKey" name="locationKey">
+                            @foreach (var city in cities)
+                            {
+                                <option value="@city.Key">@city.ToString()</option>
+                            }
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary w-100 mt-3">Show Weather</button>
+                </form>
+            }
+
+            @if (weather != null)
+            {
+                <div class="mt-5">
+                    <h3 class="text-center text-success">Weather Forecast</h3>
+                    <div class="card mt-3">
+                        <div class="card-body">
+                            <p><strong>City:</strong> @lastCity?.LocalizedName</p>
+                            <p><strong>Headline:</strong> @weather.Headline.Text</p>
+                            <p><strong>Min Temperature:</strong> @weather.DailyForecasts.First().Temperature.Minimum.Value @weather.DailyForecasts.First().Temperature.Minimum.Unit</p>
+                            <p><strong>Max Temperature:</strong> @weather.DailyForecasts.First().Temperature.Maximum.Value @weather.DailyForecasts.First().Temperature.Maximum.Unit</p>
+                            <p><strong>Rain Expected:</strong> @(weather.DailyForecasts.First().IsRainExpected ? "Yes" : "No")</p>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+    </div>
+</div>
