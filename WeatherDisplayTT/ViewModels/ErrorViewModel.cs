@@ -1,4 +1,4 @@
-namespace WeatherDisplayTT.Models
+namespace WeatherDisplayTT.ViewModels
 {
     public class ErrorViewModel
     {
